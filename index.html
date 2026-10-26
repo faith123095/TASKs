@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2563eb">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("planner.theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}</script>
+<title>Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg1:#fff;--bg2:#eef2f8;--bg3:#dbe7ff;--g1:#b7d2ff;--g2:#d9e0eb;--glass:rgba(255,255,255,.74);--gb:rgba(255,255,255,.95);--white:#fff;--mist:#f4f7fb;--silver:#e3e8f0;--steel:#7d8aa0;--ink:#152033;--blue:#2563eb;--soft:#5b92ff;--sky:#d6e5ff;--hi:#e5484d;--lo:#a3aec0;
+--d:"Sora","Segoe UI",system-ui,sans-serif;--b:"Manrope","Segoe UI",system-ui,sans-serif}
+:root[data-theme="dark"]{color-scheme:dark;--white:#18202f;--mist:#202a3d;--silver:#2d3950;--steel:#97a4bb;--ink:#e9eef7;--sky:#223a66;--bg1:#0d121c;--bg2:#121a29;--bg3:#16264a;--g1:#1d3b7a;--g2:#1a2336;--glass:rgba(24,32,47,.78);--gb:rgba(255,255,255,.08)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:var(--b);color:var(--ink);background:radial-gradient(900px 600px at 90% -8%,var(--g1),transparent 62%),radial-gradient(700px 520px at -8% 108%,var(--g2),transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg2) 48%,var(--bg3));background-attachment:fixed}
+.wrap{max-width:1200px;margin:0 auto;padding:40px 24px}
+.top{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end;margin-bottom:24px}
+h1{font-family:var(--d);font-size:clamp(1.8rem,3.5vw,2.5rem);letter-spacing:-.02em;margin:0 0 6px}
+.top p{margin:0;color:var(--steel)}
+.nav{display:flex;gap:8px;align-items:center}
+button,select,input{font:inherit;color:var(--ink)}
+.nav button,.nav select{padding:9px 14px;background:var(--white);border:1px solid var(--silver);border-radius:12px;cursor:pointer}
+.nav .go{background:linear-gradient(135deg,var(--soft),var(--blue));color:#fff;border:0;font-weight:600}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.panel{background:var(--glass);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid var(--gb);border-radius:22px;padding:20px;box-shadow:0 1px 0 var(--gb) inset,0 40px 70px -45px rgba(37,99,235,.4),0 8px 24px -14px rgba(21,32,51,.14)}
+aside{display:grid;gap:24px}
+.wk,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wk div{text-align:center;color:var(--steel);font-size:.85rem;padding:4px 0 8px}
+.cell{min-height:92px;padding:6px;text-align:left;background:var(--white);border:1px solid var(--silver);border-radius:12px;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.cell:hover{border-color:#b9c9e6}
+.cell.sel{border-color:var(--blue);box-shadow:0 0 0 2px var(--sky)}
+.cell.blank{visibility:hidden}
+.num{font-size:.85rem;font-weight:600;width:24px;height:24px;display:grid;place-items:center;border-radius:50%}
+.cell.today .num{background:linear-gradient(135deg,var(--soft),var(--blue));color:#fff}
+.chip{font-size:.72rem;padding:2px 6px;border-radius:6px;background:var(--mist);border-left:3px solid var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.high{border-color:var(--hi)}.chip.low{border-color:var(--lo)}.chip.done{text-decoration:line-through;color:var(--steel)}
+.more{font-size:.72rem;color:var(--steel)}
+h2{font-family:var(--d);font-size:1.05rem;margin:0 0 4px}
+.sub{color:var(--steel);font-size:.85rem;margin:0 0 14px}
+.f{display:grid;gap:8px;margin-bottom:14px}
+.f input,.f select{width:100%;padding:10px 12px;background:var(--white);border:1px solid var(--silver);border-radius:10px}
+.f .r{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.f button,.ask button{padding:10px;font-weight:600;color:#fff;border:0;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,var(--soft),var(--blue))}
+ul{list-style:none;margin:0;padding:0}
+.t{display:flex;gap:10px;align-items:flex-start;padding:10px 2px;border-top:1px solid var(--silver)}
+.t input{margin-top:4px;accent-color:var(--blue)}
+.t .b{flex:1;min-width:0;overflow-wrap:anywhere}
+.t small{display:block;color:var(--steel)}
+.t.done .n{text-decoration:line-through;color:var(--steel)}
+.t .x{border:0;background:none;color:var(--lo);font-size:1.2rem;cursor:pointer}
+.t .x:hover{color:var(--ink)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--soft);margin-right:6px}
+.dot.high{background:var(--hi)}.dot.low{background:var(--lo)}
+.empty{color:var(--steel);padding:8px 0}
+#log{max-height:240px;overflow:auto;display:grid;gap:8px;margin-bottom:10px}
+.m{padding:9px 12px;border-radius:12px;font-size:.9rem;line-height:1.45;white-space:pre-wrap;max-width:92%}
+.m.bot{background:var(--mist);border:1px solid var(--silver)}
+.m.me{background:var(--sky);justify-self:end}
+.ask{display:flex;gap:8px}.ask input{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--silver);border-radius:10px;background:var(--white)}
+.ask button{padding:0 16px}
+@media(max-width:960px){.grid{grid-template-columns:1fr}.cell{min-height:64px}.chip{display:none}.cell .more{display:none}.cell.has .num::after{content:"";}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+#auth{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#auth[hidden]{display:none}
+.card{width:100%;max-width:380px;background:var(--white);border:1px solid var(--silver);border-radius:22px;padding:28px;display:grid;gap:10px;box-shadow:0 40px 80px -30px rgba(37,99,235,.5)}
+.card h2{font-size:1.3rem;margin:0}
+.card input{padding:11px 12px;background:var(--mist);border:1px solid var(--silver);border-radius:10px;width:100%}
+.card .p{padding:11px;font-weight:600;color:#fff;border:0;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,var(--soft),var(--blue))}
+.card .s{padding:11px;font-weight:600;background:var(--white);border:1px solid var(--silver);border-radius:10px;cursor:pointer}
+.card .l{background:none;border:0;color:var(--blue);cursor:pointer;padding:4px}
+#err{color:var(--hi);font-size:.85rem;min-height:1.1em;margin:0}
+.nav .ic{padding:9px 12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><h1>Planner</h1><p>Every task, deadline, and note in one calendar.</p></div>
+    <div class="nav">
+      <button id="prev" aria-label="Previous month">&lsaquo;</button>
+      <select id="mo" aria-label="Month"></select>
+      <select id="yr" aria-label="Year"></select>
+      <button id="next" aria-label="Next month">&rsaquo;</button>
+      <button id="now" class="go">Today</button>
+      <button id="th" class="ic" aria-label="Switch theme" title="Switch theme">&#9790;</button>
+      <button id="acct">Sign in</button>
+    </div>
+  </header>
+  <main class="grid">
+    <section class="panel" aria-label="Calendar"><div class="wk" id="wk"></div><div class="days" id="days"></div></section>
+    <aside>
+      <section class="panel" aria-label="Selected day">
+        <h2 id="dh"></h2><p class="sub" id="ds"></p>
+        <div class="f">
+          <input id="ti" type="text" placeholder="Add a task for this day" aria-label="Task title" autocomplete="off">
+          <div class="r"><input id="tm" type="time" aria-label="Time"><select id="pr" aria-label="Priority"><option value="med">Medium</option><option value="high">High</option><option value="low">Low</option></select></div>
+          <input id="nt" type="text" placeholder="Notes (optional)" aria-label="Notes" autocomplete="off">
+          <button id="add">Add task</button>
+        </div>
+        <ul id="tl"></ul>
+      </section>
+      <section class="panel" aria-label="AI helper">
+        <h2>AI helper</h2><p class="sub">Type a task in plain words, or ask what&rsquo;s coming up.</p>
+        <div id="log"></div>
+        <div class="ask"><input id="ai" type="text" placeholder="e.g. Submit report Friday 3pm high" aria-label="Message the helper" autocomplete="off"><button id="send">Send</button></div>
+      </section>
+    </aside>
+  </main>
+</div>
+<div id="auth" hidden><div class="card" role="dialog" aria-modal="true" aria-labelledby="at">
+  <h2 id="at">Welcome to Planner</h2><p class="sub" id="am">Sign in to keep your plans safe and synced on every device.</p>
+  <button class="s" id="gg">Continue with Google</button>
+  <input id="em" type="email" placeholder="Email" aria-label="Email" autocomplete="email">
+  <input id="pw" type="password" placeholder="Password (6+ characters)" aria-label="Password" autocomplete="current-password">
+  <p id="err" role="alert"></p>
+  <button class="p" id="li">Log in</button><button class="s" id="su">Create account</button>
+  <button class="l" id="gs">Continue on this device only</button>
+</div></div>
+<script>
+var AI_ENDPOINT = ""; // optional: your own server URL that returns {reply}. Never put an API key in this file.
+var KEY = "planner.tasks", MIN = 2026;
+var MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var DN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var tasks = []; try { tasks = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
+function $(i){return document.getElementById(i)}
+function pad(n){return String(n).padStart(2,"0")}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function fromIso(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(tasks))}catch(e){}if(window.cloudSave)window.cloudSave()}
+function ft(t){if(!t)return"";var p=t.split(":"),h=+p[0];return (h%12||12)+":"+p[1]+" "+(h<12?"AM":"PM")}
+function pretty(s){return fromIso(s).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
+function onDay(s){return tasks.filter(function(t){return t.date===s}).sort(function(a,b){return (a.time||"99").localeCompare(b.time||"99")})}
+var real = new Date(); real.setHours(0,0,0,0);
+var start = real.getFullYear() < MIN ? new Date(MIN,0,1) : real;
+var sel = iso(start), vy = start.getFullYear(), vm = start.getMonth();
+
+DN.forEach(function(d){var e=document.createElement("div");e.textContent=d;$("wk").appendChild(e)});
+MN.forEach(function(m,i){var o=document.createElement("option");o.value=i;o.textContent=m;$("mo").appendChild(o)});
+for(var y=MIN;y<=2050;y++){var o=document.createElement("option");o.value=y;o.textContent=y;$("yr").appendChild(o)}
+
+function render(){
+  $("mo").value=vm;$("yr").value=vy;
+  var first=new Date(vy,vm,1).getDay(),n=new Date(vy,vm+1,0).getDate(),g=$("days");
+  g.innerHTML="";
+  for(var i=0;i<first;i++){var b=document.createElement("div");b.className="cell blank";g.appendChild(b)}
+  for(var d=1;d<=n;d++){(function(d){
+    var s=vy+"-"+pad(vm+1)+"-"+pad(d),list=onDay(s),c=document.createElement("button");
+    c.className="cell"+(s===iso(real)?" today":"")+(s===sel?" sel":"")+(list.length?" has":"");
+    c.setAttribute("aria-label",pretty(s)+", "+list.length+" tasks");
+    var num=document.createElement("span");num.className="num";num.textContent=d;c.appendChild(num);
+    list.slice(0,2).forEach(function(t){var h=document.createElement("span");h.className="chip "+t.pri+(t.done?" done":"");h.textContent=t.title;c.appendChild(h)});
+    if(list.length>2){var m=document.createElement("span");m.className="more";m.textContent="+"+(list.length-2)+" more";c.appendChild(m)}
+    c.onclick=function(){sel=s;render()};
+    g.appendChild(c);
+  })(d)}
+  var dt=fromIso(sel),l=onDay(sel),done=l.filter(function(t){return t.done}).length;
+  $("dh").textContent=dt.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  $("ds").textContent=l.length?done+" of "+l.length+" done":"Nothing planned yet";
+  var ul=$("tl");ul.innerHTML="";
+  if(!l.length){var e=document.createElement("li");e.className="empty";e.textContent="Add a task above to plan this day.";ul.appendChild(e)}
+  l.forEach(function(t){
+    var li=document.createElement("li");li.className="t"+(t.done?" done":"");
+    var cb=document.createElement("input");cb.type="checkbox";cb.checked=t.done;cb.setAttribute("aria-label","Mark done");
+    cb.onchange=function(){t.done=cb.checked;save();render()};
+    var b=document.createElement("div");b.className="b";
+    var n1=document.createElement("div");n1.className="n";
+    var dot=document.createElement("span");dot.className="dot "+t.pri;n1.appendChild(dot);
+    n1.appendChild(document.createTextNode(t.title));b.appendChild(n1);
+    var meta=[ft(t.time),t.notes].filter(Boolean).join(" \u00b7 ");
+    if(meta){var sm=document.createElement("small");sm.textContent=meta;b.appendChild(sm)}
+    var x=document.createElement("button");x.className="x";x.textContent="\u00d7";x.setAttribute("aria-label","Delete task");
+    x.onclick=function(){tasks=tasks.filter(function(k){return k!==t});save();render()};
+    li.append(cb,b,x);ul.appendChild(li);
+  });
+}
+function addTask(date,title,time,pri,notes){
+  tasks.push({date:date,title:title,time:time||"",pri:pri||"med",notes:notes||"",done:false});save();
+}
+function jump(s){sel=s;var d=fromIso(s);vy=d.getFullYear();vm=d.getMonth();render()}
+
+$("prev").onclick=function(){if(vy===MIN&&vm===0)return;vm--;if(vm<0){vm=11;vy--}render()};
+$("next").onclick=function(){vm++;if(vm>11){vm=0;vy++}if(vy>2050){vy=2050;vm=11}render()};
+$("mo").onchange=function(){vm=+$("mo").value;render()};
+$("yr").onchange=function(){vy=+$("yr").value;render()};
+$("now").onclick=function(){jump(iso(start))};
+function submit(){
+  var t=$("ti").value.trim();if(!t){$("ti").focus();return}
+  addTask(sel,t,$("tm").value,$("pr").value,$("nt").value.trim());
+  $("ti").value="";$("tm").value="";$("nt").value="";render();
+}
+$("add").onclick=submit;
+$("ti").addEventListener("keydown",function(e){if(e.key==="Enter")submit()});
+
+/* AI helper: works offline in the browser */
+function say(txt,me){var m=document.createElement("div");m.className="m "+(me?"me":"bot");m.textContent=txt;$("log").appendChild(m);$("log").scrollTop=1e9}
+function parse(text){
+  var low=text, date=null, time="", pri="med", hit;
+  function cut(re){var m=low.match(re);if(m)low=low.replace(m[0]," ");return m}
+  function plus(n){var d=new Date(real);d.setDate(d.getDate()+n);return iso(d)}
+  if(hit=cut(/\b(\d{4})-(\d{2})-(\d{2})\b/))date=hit[0];
+  else if(cut(/\b(today|ngayon)\b/i))date=iso(real);
+  else if(cut(/\b(tomorrow|bukas)\b/i))date=plus(1);
+  else if(cut(/\b(next week|susunod na linggo)\b/i))date=plus(7);
+  else if(hit=cut(/\bin (\d+) days?\b/i))date=plus(+hit[1]);
+  else if(hit=cut(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? (\d{1,2})(?:,? (\d{4}))?\b/i)){
+    var mi=MN.map(function(m){return m.slice(0,3).toLowerCase()}).indexOf(hit[1].toLowerCase()),yy=hit[3]?+hit[3]:real.getFullYear();
+    var d=new Date(yy,mi,+hit[2]);if(!hit[3]&&d<real)d=new Date(yy+1,mi,+hit[2]);date=iso(d)}
+  else if(hit=cut(/\b(sun|mon|tue|wed|thu|fri|sat)[a-z]*\b/i)){
+    var w=DN.map(function(x){return x.toLowerCase()}).indexOf(hit[1].toLowerCase()),diff=(w-real.getDay()+7)%7||7;date=plus(diff)}
+  if(hit=cut(/\b(\d{1,2})(?::(\d{2}))?\s?(am|pm)\b/i)){var h=+hit[1]%12+(hit[3].toLowerCase()==="pm"?12:0);time=pad(h)+":"+(hit[2]||"00")}
+  else if(hit=cut(/\b([01]?\d|2[0-3]):([0-5]\d)\b/))time=pad(+hit[1])+":"+hit[2];
+  if(cut(/\b(urgent|high|important|importante)\b/i))pri="high";else if(cut(/\blow\b/i))pri="low";
+  low=low.replace(/^\s*(please |pls )?(add|create|remind me to|remind me|paalala|gawin)\b/i,"").replace(/\b(on|at|by|sa)\s*$/i,"").replace(/\s+/g," ").replace(/^[\s,.\-]+|[\s,.\-]+$/g,"");
+  return {date:date||sel,title:low?low.charAt(0).toUpperCase()+low.slice(1):"",time:time,pri:pri};
+}
+function listFor(a,b){
+  var out=tasks.filter(function(t){return !t.done&&t.date>=a&&t.date<=b}).sort(function(x,y){return (x.date+(x.time||"99")).localeCompare(y.date+(y.time||"99"))});
+  return out.map(function(t){return "\u2022 "+pretty(t.date)+(t.time?" "+ft(t.time):"")+" \u2014 "+t.title+(t.pri==="high"?" (high)":"")}).join("\n");
+}
+function answer(q){
+  var low=q.toLowerCase(),today=iso(real),d1=new Date(real);d1.setDate(d1.getDate()+1);var tom=iso(d1);
+  var d7=new Date(real);d7.setDate(d7.getDate()+7);var wk=iso(d7),r;
+  if(/help|ano ang kaya mong|what can you/.test(low))return "Type a task like \u201cSubmit report Friday 3pm high\u201d and I\u2019ll put it on the calendar. You can also ask: \u201cwhat\u2019s due today?\u201d, \u201ctomorrow\u201d, \u201cthis week\u201d, \u201coverdue\u201d, or \u201csummary\u201d.";
+  if(/overdue|late|lampas/.test(low)){r=listFor("0000-01-01",iso(new Date(real.getTime()-864e5)));return r||"Nothing overdue. Nice."}
+  if(/summary|buod/.test(low)){var o=tasks.filter(function(t){return !t.done}).length;return tasks.length+" tasks in total, "+(tasks.length-o)+" done, "+o+" still open.\nNext 7 days:\n"+(listFor(today,wk)||"Nothing scheduled.")}
+  if(/tomorrow|bukas/.test(low)){r=listFor(tom,tom);return r||"Nothing planned for tomorrow."}
+  if(/week|linggo/.test(low)){r=listFor(today,wk);return r||"Nothing planned for the next 7 days."}
+  r=listFor(today,today);return r||"Nothing planned for today."
+}
+function ask(){
+  var q=$("ai").value.trim();if(!q)return;$("ai").value="";say(q,true);
+  if(AI_ENDPOINT){
+    fetch(AI_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:q,tasks:tasks})})
+      .then(function(r){return r.json()}).then(function(j){say(j.reply||"No reply.")}).catch(function(){say("Couldn\u2019t reach the AI server.")});
+    return;
+  }
+  var isQ=/\?$|^(what|show|list|ano|anong|may|summary|help|overdue|tasks?\b|buod)/i.test(q);
+  if(isQ){say(answer(q));return}
+  var p=parse(q);
+  if(!p.title){say("What should the task be called? Try \u201cSubmit report Friday 3pm\u201d.");return}
+  if(p.date<MIN+"-01-01"){say("The calendar starts in January "+MIN+".");return}
+  addTask(p.date,p.title,p.time,p.pri,"");jump(p.date);
+  say("Added \u201c"+p.title+"\u201d on "+pretty(p.date)+(p.time?" at "+ft(p.time):"")+(p.pri==="high"?", marked high priority.":"."));
+}
+$("send").onclick=ask;
+$("ai").addEventListener("keydown",function(e){if(e.key==="Enter")ask()});
+say("Hi! Tell me what you need to do and when, and I\u2019ll add it. Type \u201chelp\u201d to see what I can do.");
+/* theme */
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("planner.theme",t)}catch(e){}$("th").innerHTML=t==="dark"?"&#9728;":"&#9790;"}
+$("th").onclick=function(){setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark")};
+setTheme(document.documentElement.dataset.theme||"light");
+/* sign-in screen */
+function showAuth(msg){$("err").textContent=msg||"";$("auth").hidden=false}
+function hideAuth(){$("auth").hidden=true}
+var AM={"auth/invalid-credential":"Wrong email or password.","auth/email-already-in-use":"That email already has an account. Try logging in.","auth/weak-password":"Use at least 6 characters.","auth/invalid-email":"Check the email address.","auth/popup-closed-by-user":""};
+function run(f){$("err").textContent="";if(!window.authApi){$("err").textContent="Cloud sign-in isn\u2019t set up yet. You can continue on this device for now.";return}
+  f(window.authApi).catch(function(e){var c=e&&e.code;$("err").textContent=c in AM?AM[c]:"Something went wrong. Try again."})}
+$("li").onclick=function(){run(function(a){return a.login($("em").value.trim(),$("pw").value)})};
+$("su").onclick=function(){run(function(a){return a.signup($("em").value.trim(),$("pw").value)})};
+$("gg").onclick=function(){run(function(a){return a.google()})};
+$("pw").addEventListener("keydown",function(e){if(e.key==="Enter")$("li").click()});
+$("gs").onclick=function(){try{localStorage.setItem("planner.guest","1")}catch(e){}hideAuth()};
+$("acct").onclick=function(){if(window.doSignOut)window.doSignOut();else showAuth()};
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});
+render();
+</script>
+<script type="module">
+/* Paste your Firebase web config here (see the steps in the chat) */
+var cfg={apiKey:"",authDomain:"",projectId:"",appId:""};
+var B="https://www.gstatic.com/firebasejs/10.12.2/";
+function isGuest(){try{return localStorage.getItem("planner.guest")==="1"}catch(e){return false}}
+if(!cfg.apiKey){if(!isGuest())showAuth("Cloud sign-in isn\u2019t set up yet. Continue on this device for now.")}
+else try{
+  var A=await import(B+"firebase-app.js"),U=await import(B+"firebase-auth.js"),F=await import(B+"firebase-firestore.js");
+  var app=A.initializeApp(cfg),auth=U.getAuth(app),db=F.getFirestore(app),ref=null,unsub=null,wasIn=false;
+  window.authApi={
+    login:function(e,p){return U.signInWithEmailAndPassword(auth,e,p)},
+    signup:function(e,p){return U.createUserWithEmailAndPassword(auth,e,p)},
+    google:function(){return U.signInWithPopup(auth,new U.GoogleAuthProvider())}
+  };
+  window.cloudSave=function(){if(ref)F.setDoc(ref,{tasks:window.tasks,updated:Date.now()}).catch(function(){})};
+  U.onAuthStateChanged(auth,function(u){
+    if(unsub){unsub();unsub=null}
+    var a=document.getElementById("acct");
+    if(u){
+      wasIn=true;try{localStorage.removeItem("planner.guest")}catch(e){}
+      ref=F.doc(db,"users",u.uid);hideAuth();a.textContent="Sign out";a.title=u.email||"";
+      window.doSignOut=function(){U.signOut(auth)};
+      unsub=F.onSnapshot(ref,function(s){
+        if(s.metadata.hasPendingWrites)return;
+        if(s.exists()){window.tasks=s.data().tasks||[];try{localStorage.setItem(KEY,JSON.stringify(window.tasks))}catch(e){}render()}
+        else if(window.tasks.length)window.cloudSave();
+      });
+    }else{
+      ref=null;window.doSignOut=null;a.textContent="Sign in";a.title="";
+      if(wasIn){wasIn=false;window.tasks=[];try{localStorage.removeItem(KEY)}catch(e){}render()}
+      if(!isGuest())showAuth();
+    }
+  });
+}catch(e){if(!isGuest())showAuth("Can\u2019t reach sign-in right now. Continue on this device or try again online.")}
+</script>
+
+</body>
+</html>
